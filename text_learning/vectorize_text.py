@@ -5,7 +5,7 @@ import pickle
 import re
 import sys
 
-sys.path.append( "../tools/" )
+sys.path.append("../tools/")
 from parse_out_email_text import parseOutText
 
 """
@@ -23,39 +23,47 @@ from parse_out_email_text import parseOutText
 """
 
 
-from_sara  = open("from_sara.txt", "r")
+from_sara = open("from_sara.txt", "r")
 from_chris = open("from_chris.txt", "r")
 
 from_data = []
 word_data = []
 
-### temp_counter is a way to speed up the development--there are
-### thousands of emails from Sara and Chris, so running over all of them
-### can take a long time
-### temp_counter helps you only look at the first 200 emails in the list so you
-### can iterate your modifications quicker
+# temp_counter is a way to speed up the development--there are
+# thousands of emails from Sara and Chris, so running over all of them
+# can take a long time
+# temp_counter helps you only look at the first 200 emails in the list so you
+# can iterate your modifications quicker
 temp_counter = 0
 
 
 for name, from_person in [("sara", from_sara), ("chris", from_chris)]:
     for path in from_person:
-        ### only look at first 200 emails when developing
-        ### once everything is working, remove this line to run over full dataset
+        # only look at first 200 emails when developing
+        # once everything is working, remove this line to run over full dataset
         temp_counter += 1
-        if temp_counter < 200:
+        if True:
             path = os.path.join('..', path[:-1])
-            print path
+            # print path
             email = open(path, "r")
 
-            ### use parseOutText to extract the text from the opened email
+            # use parseOutText to extract the text from the opened email
+            words = parseOutText(email)
 
-            ### use str.replace() to remove any instances of the words
-            ### ["sara", "shackleton", "chris", "germani"]
+            # use str.replace() to remove any instances of the words
+            for w in ["sara", "shackleton", "chris", "germani", "sshacklensf", "cgermannsf"]:
+                words = words.replace(w, "")
 
-            ### append the text to word_data
+            # append the text to word_data
+            word_data.append(words)
 
-            ### append a 0 to from_data if email is from Sara, and 1 if email is from Chris
+            # append a 0 to from_data if email is from Sara, and 1 if email is
+            # from Chris
 
+            if name == "sara":
+                from_data.append(0)
+            else:
+                from_data.append(1)
 
             email.close()
 
@@ -63,13 +71,22 @@ print "emails processed"
 from_sara.close()
 from_chris.close()
 
-pickle.dump( word_data, open("your_word_data.pkl", "w") )
-pickle.dump( from_data, open("your_email_authors.pkl", "w") )
+# print word_data[152]
+print len(word_data)
+
+pickle.dump(word_data, open("your_word_data.pkl", "w"))
+pickle.dump(from_data, open("your_email_authors.pkl", "w"))
 
 
+# in Part 4, do TfIdf vectorization here
 
+from sklearn.feature_extraction.text import CountVectorizer
 
+count_vect = CountVectorizer(stop_words="english")
+X_train_counts = count_vect.fit_transform(word_data)
 
-### in Part 4, do TfIdf vectorization here
+# print X_train_counts.vocab_list[34597]
 
+# from sklearn.feature_extraction.text import TfidfTransformer
 
+# X_train_tfidf = TfidfTransformer(use_idf=True).fit_transform(X_train_counts)
